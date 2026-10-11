@@ -125,16 +125,14 @@ public class RiderService {
 
 	// get all assigned rides
 	public ResponseStructure<Map<Object, Object>> getAssignedRide(int riderId) {
+
 		riderrepository.findById(riderId).orElseThrow(() -> new RiderNotFoundException());
 
 		String riderKey = "rider:" + riderId + ":requests";
 		Map<Object, Object> rides = redistemplate.opsForHash().entries(riderKey);
 
-		if (rides.isEmpty()) {
-			throw new RuntimeException("No assigned ride found");
-		}
-
 		for (Map.Entry<Object, Object> entry : rides.entrySet()) {
+
 			String bookingId = String.valueOf(entry.getKey());
 
 			if (!bookingId.matches("\\d+")) {
@@ -142,14 +140,17 @@ public class RiderService {
 			}
 
 			String rideKey = String.valueOf(entry.getValue()).replace("\"", "").trim();
+
 			Map<Object, Object> booking = redistemplate.opsForHash().entries(rideKey);
 
-			if (!booking.isEmpty() && "ASSIGNED".equals(String.valueOf(booking.get("status")).replace("\"", ""))) {
+			String status = String.valueOf(booking.get("status")).replace("\"", "").trim();
+
+			if (!booking.isEmpty() && "ASSIGNED".equals(status)) {
 				return new ResponseStructure<>(HttpStatus.OK.value(), "Assigned Ride", booking);
 			}
 		}
 
-		throw new RuntimeException("No assigned ride found");
+		return new ResponseStructure<>(HttpStatus.NOT_FOUND.value(), "No assigned ride found", null);
 	}
 
 	// Find nearby riders
@@ -339,6 +340,7 @@ public class RiderService {
 
 	// complete ride
 	public ResponseStructure<Map<Object, Object>> completeRide(int riderId) {
+
 		riderrepository.findById(riderId).orElseThrow(() -> new RiderNotFoundException());
 
 		String riderKey = "rider:" + riderId + ":requests";
@@ -349,8 +351,11 @@ public class RiderService {
 		}
 
 		String rideKey = null;
+		Map<Object, Object> booking = null;
+		java.time.LocalDateTime latestPickupTime = null;
 
 		for (Map.Entry<Object, Object> entry : rides.entrySet()) {
+
 			String bookingId = String.valueOf(entry.getKey());
 
 			if (!bookingId.matches("\\d+")) {
@@ -358,12 +363,31 @@ public class RiderService {
 			}
 
 			String currentRideKey = String.valueOf(entry.getValue()).replace("\"", "").trim();
+
 			Map<Object, Object> currentBooking = redistemplate.opsForHash().entries(currentRideKey);
 
-			if (!currentBooking.isEmpty()
-					&& "STARTED".equals(String.valueOf(currentBooking.get("status")).replace("\"", ""))) {
+			if (currentBooking.isEmpty()) {
+				continue;
+			}
+
+			String status = String.valueOf(currentBooking.get("status")).replace("\"", "").trim();
+
+			if (!"STARTED".equals(status)) {
+				continue;
+			}
+
+			String pickupTimeValue = String.valueOf(currentBooking.get("pickupTime")).replace("\"", "").trim();
+
+			if (pickupTimeValue.isEmpty() || pickupTimeValue.equalsIgnoreCase("null")) {
+				continue;
+			}
+
+			java.time.LocalDateTime pickupTime = java.time.LocalDateTime.parse(pickupTimeValue);
+
+			if (latestPickupTime == null || pickupTime.isAfter(latestPickupTime)) {
+				latestPickupTime = pickupTime;
 				rideKey = currentRideKey;
-				break;
+				booking = currentBooking;
 			}
 		}
 
@@ -374,7 +398,7 @@ public class RiderService {
 		redistemplate.opsForHash().put(rideKey, "status", "COMPLETED");
 		redistemplate.opsForHash().put(rideKey, "dropTime", java.time.LocalDateTime.now().toString());
 
-		Map<Object, Object> booking = redistemplate.opsForHash().entries(rideKey);
+		booking = redistemplate.opsForHash().entries(rideKey);
 
 		return new ResponseStructure<>(HttpStatus.OK.value(), "Ride Completed", booking);
 	}

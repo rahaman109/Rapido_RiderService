@@ -1,15 +1,28 @@
 package com.alpha.riderservice.requestdto;
-import jakarta.persistence.OneToOne;
 
 public class RiderCreateRequestDto {
+
 	private String name;
 	private long mobno;
 	private String gender;
 	private String email;
 	private String drivinglicense;
-	
-	@OneToOne
 	private VehicleRequestDto vehicleRequestDto;
+
+	public RiderCreateRequestDto() {
+		super();
+	}
+
+	public RiderCreateRequestDto(String name, long mobno, String gender, String email, String drivinglicense,
+			VehicleRequestDto vehicleRequestDto) {
+		super();
+		this.name = name;
+		this.mobno = mobno;
+		this.gender = gender;
+		this.email = email;
+		this.drivinglicense = drivinglicense;
+		this.vehicleRequestDto = vehicleRequestDto;
+	}
 
 	public String getName() {
 		return name;
@@ -55,23 +68,7 @@ public class RiderCreateRequestDto {
 		return vehicleRequestDto;
 	}
 
-	public void setVehicleDto(VehicleRequestDto vehicledto) {
-		this.vehicleRequestDto = vehicledto;
-	}
-
-	public RiderCreateRequestDto() {
-		super();
-	}
-
-	public RiderCreateRequestDto(String name, long mobno, String gender, String email, String drivinglicense,
-			VehicleRequestDto vehicledto) {
-		super();
-		this.name = name;
-		this.mobno = mobno;
-		this.gender = gender;
-		this.email = email;
-		this.drivinglicense = drivinglicense;
-		this.vehicleRequestDto = vehicledto;
+	public void setVehicleDto(VehicleRequestDto vehicleRequestDto) {
+		this.vehicleRequestDto = vehicleRequestDto;
 	}
 }
-
