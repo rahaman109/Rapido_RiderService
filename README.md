@@ -1,35 +1,33 @@
 # Rapido Rider Service
 
 ## Overview
-Rider Service is a backend microservice for a ride-booking application developed using Java and Spring Boot. It manages rider-related operations within the application.
+Rider Service is a backend microservice developed using Java and Spring Boot for a ride-booking application. It handles rider-related operations.
 
 ## Technologies Used
 - Java
 - Spring Boot
-- Spring Data JPA / Hibernate
+- Spring Data JPA
+- Hibernate
 - PostgreSQL
 - REST APIs
 - Maven
 - Postman
 
 ## Features
-- Rider-related backend operations
+- Rider-related operations
 - REST API development for rider management
 - Rider data persistence using PostgreSQL
-- Integration with the ride-booking workflow
+- Rider-related business logic
 - API testing using Postman
 
-## Project Structure
-This service is part of a microservices-based ride-booking project.
+## Architecture
+This service is part of a microservices-based ride-booking project and works alongside Customer Service.
 
-## Setup
-1. Clone this repository.
-2. Configure your PostgreSQL connection in the application configuration.
-3. Ensure the required database exists.
+## How to Run
+1. Clone the repository.
+2. Configure the PostgreSQL database connection in the application configuration.
+3. Ensure PostgreSQL is running and the required database exists.
 4. Run the Spring Boot application.
-
-## API Testing
-Use Postman to test the available rider endpoints.
 
 ## Author
 Shaik Abdul Rahaman
